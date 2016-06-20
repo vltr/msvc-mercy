@@ -57,6 +57,35 @@ Some other tools I have installed at `%CUSTOM_BINPATH%` or `%PROGRAMFILES%` and 
 * [Python 2.7 x86](http://www.python.org/download/)
 * [Jom](https://wiki.qt.io/Jom) (optional)
 
+## You shall not forget ...
+
+... that, in order to successfully compile something for Windows XP, you will be using these flags **A LOT**:
+
+`/SUBSYSTEM:WINDOWS,5.01`
+`/SUBSYSTEM:CONSOLE,5.01`
+
+Why? Because the binary signature created using newer versions [of Windows / Visual C++ / whatever] will not work with Windows XP, you'll probably get an error like this:
+
+![Not a valid WHAT?](https://raw.githubusercontent.com/vltr/msvc-mercy/master/assets/not_a_valid_win32_app.png)
+
+`<whatever_bin.exe> is not a valid Win32 application`.
+
+Sweeeeeeeeeet ... Not. The solution, however, is quite interesting. There are two ways to "fix" this:
+
+0. You do it right and add the valid `/SUBSYSTEM:...,5.01` in your flags; or ...
+0. You can also edit your executable using any hexeditor. Really.
+
+It is quite funny, because you just need to change a couple of bytes and it'll work (probably). Using an editor with 16 bytes per row, offset in hex, probably around row 140, you find two pairs of three bytes, quite near to each other, probably with these values: `06 00 00`. This means that at least Windows API 6.00 is required to run the executable.
+So, the fix is simple: under Windows XP x86, you'll change from `06 00 00` to `05 00 01`, which will be written to the binary if you use the `/SUBSYSTEM:..,5.01` flag. I would say this is the best approach :) Yet, here's what it looks like in the hex editor:
+
+![Before edit](https://raw.githubusercontent.com/vltr/msvc-mercy/master/assets/hex_edit_01.png)
+
+I have highlighted the areas where the signature matches. After editing:
+
+![After edit](https://raw.githubusercontent.com/vltr/msvc-mercy/master/assets/hex_edit_02.png)
+
+Now, by having these changes, your executable will run under Windows XP (5.01 is for x86, 5.02 is for Windows XP 64). Cool, huh?
+
 # "The time has come to shine"
 
 The list of what I already had compiled under Windows is quite big, so I'll keep here a list to some of the tricky ones:

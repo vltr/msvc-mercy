@@ -2,7 +2,7 @@
 
 Well, this is a tricky one. OpenSSL is the main toolkit for cryptography these days (and for a long time), but to create binaries suitable for Windows ...
 
-The greatest effort I've seen was from [this article](http://hostagebrain.blogspot.com.br/2015/04/build-openssl-on-windows.html), but I just found it when I was polishing linking errors.
+The greatest effort I've seen was from [this article](http://hostagebrain.blogspot.com.br/2015/04/build-openssl-on-windows.html), but I just found it when I was polishing linking errors with NASM. I will provide some more tips from this article as they're needed.
 
 ## Requirements
 
@@ -16,20 +16,32 @@ There are some requirements to compile OpenSSL under Windows:
 
 We will be creating builds with and without ASM, for release or debug. The following table explains paths and what will be installed into each one of them:
 
-| Path | [N]ASM | Debug or Release |
-|------|--------|------------------|
-| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-nasm` | Yes | Debug |
-| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-nasm` | Yes | Release |
-| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-no_asm` | No | Debug |
-| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-no_asm` | No | Release |
+| Path | [N]ASM | Debug or Release | Static or Dynamic |
+|------|--------|------------------|-------------------|
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-nasm` | Yes | Debug | Dynamic |
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-nasm` | Yes | Release | Dynamic |
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-no_asm` | No | Debug | Dynamic |
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-no_asm` | No | Release | Dynamic |
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-nasm-static` | Yes | Debug | Static |
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-nasm-static` | Yes | Release | Static |
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-no_asm-static` | No | Debug | Static |
+| `%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-no_asm-static` | No | Release | Static |
 
 ## Setup
 
-I always like to compile source code from a clean, fresh copy of its distribution. So, I always delete (if path already existent) and unpack the source code package.
+I always like to compile source code from a clean, fresh copy of its (official source) distribution. So, I always delete (if path already existent) and unpack the source code package.
 
-We'll start always from a fresh source code directory. For now, I'll just leave the snippets and **all libraries will be build as DLL**.
+We'll start always from a fresh source code directory. First, we'll compile dynamic libraries (DLL) as they are, IMHO, what developers most want (in most of the libs I would say, OpenSSL might be an exception).
 
-## Compile - ASM + Debug
+## Creating DLLs
+
+Ok, in here we will be creating an OpenSSL binary distribution to use as dynamic linking.
+
+### "Remember, remember the 5th of November"
+
+As I already told in the [README](https://github.com/vltr/msvc-mercy), all binaries here are required to run in a Windows XP environment, x86.
+
+### ASM + Debug
 
 ```batch
 perl Configure debug-VC-WIN32 --prefix="%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-nasm"
@@ -38,7 +50,7 @@ nmake -f ms\ntdll.mak
 nmake -f ms\ntdll.mak install
 ```
 
-## Compile - ASM + Release
+### ASM + Release
 
 ```batch
 perl Configure VC-WIN32 --prefix="%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-nasm"
@@ -47,7 +59,7 @@ nmake -f ms\ntdll.mak
 nmake -f ms\ntdll.mak install
 ```
 
-## Compile - NO_ASM + Debug
+### NO_ASM + Debug
 
 ```batch
 perl Configure debug-VC-WIN32 no-asm --prefix="%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-debug-no_asm"
@@ -56,7 +68,7 @@ nmake -f ms\ntdll.mak
 nmake -f ms\ntdll.mak install
 ```
 
-## Compile - NO_ASM + Release
+### NO_ASM + Release
 
 ```batch
 perl Configure VC-WIN32 no-asm --prefix="%CUSTOM_LIBPATH%\openssl-1.0.2h-msvc2013-x86-release-no_asm"
@@ -65,6 +77,8 @@ nmake -f ms\ntdll.mak
 nmake -f ms\ntdll.mak install
 ```
 
-# Quick notes
+## Creating static binaries
 
-There are some important items I still have to provide, like binary compatibility with Windows XP.
+TODO:
+- this
+- Windows XP compat
